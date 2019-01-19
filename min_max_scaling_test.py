@@ -1,3 +1,36 @@
+import tensorflow as tf
+import numpy as np
+import pandas as pd
+import datetime
+import matplotlib.pyplot as plt
+
+# 랜덤에 의해 똑같은 결과를 재현하도록 시드 설정
+# 하이퍼파라미터를 튜닝하기 위한 용도(흔들리면 무엇때문에 좋아졌는지 알기 어려움)
+tf.set_random_seed(777)
+
+
+# Standardization
+def data_standardization(x):
+    x_np = np.asarray(x)
+    return (x_np - x_np.mean()) / x_np.std()
+
+
+# 너무 작거나 너무 큰 값이 학습을 방해하는 것을 방지하고자 정규화한다
+# x가 양수라는 가정하에 최소값과 최대값을 이용하여 0~1사이의 값으로 변환
+# Min-Max scaling
+def min_max_scaling(x):
+    x_np = np.asarray(x)
+    return (x_np - x_np.min()) / (x_np.max() - x_np.min() + 1e-7)  # 1e-7은 0으로 나누는 오류 예방차원
+
+
+# 정규화된 값을 원래의 값으로 되돌린다
+# 정규화하기 이전의 org_x값과 되돌리고 싶은 x를 입력하면 역정규화된 값을 리턴한다
+def reverse_min_max_scaling(org_x, x):
+    org_x_np = np.asarray(org_x)
+    x_np = np.asarray(x)
+    return (x_np * (org_x_np.max() - org_x_np.min() + 1e-7)) + org_x_np.min()
+
+
 class Rotation:
     x = ""
     y = ""
@@ -87,5 +120,3 @@ for i in my_list:
     input_list.append(temp_list)
 output_list = my_list
 print("Hello")
-# 텐서플로우 플레이스홀더 생성
-# 입력 X, 출력 Y를 생성한다
