@@ -1,3 +1,5 @@
+import os
+
 import tensorflow as tf
 import numpy as np
 import pandas as pd
@@ -12,7 +14,7 @@ tf.set_random_seed(777)
 input_data_column_cnt = 3 * 7  # 입력데이터의 컬럼 개수(Variable 개수)
 output_data_column_cnt = 18 * 7  # 결과데이터의 컬럼 개수
 
-seq_length = 240  # 1개 시퀀스의 길이(시계열데이터 입력 개수)
+seq_length = 24  # 1개 시퀀스의 길이(시계열데이터 입력 개수)
 rnn_cell_hidden_dim = 20  # 각 셀의 (hidden)출력 크기
 forget_bias = 1.0  # 망각편향(기본값 1.0)
 num_stacked_layers = 1  # stacked LSTM layers 개수
@@ -65,7 +67,11 @@ skeleton_list = []  # 스켈레톤 순서를 담기 위함
 oh_list = ["Rotation", "Position"]
 oh2_list = ["X", "Y", "Z", "W", "X", "Y", "Z"]
 my_list = []
-with open('data/Take 2018-12-19 02.30.17 PM.csv', newline='') as csvfile:
+filepath = "C:/Users/mgh33/OneDrive/4학년1학기/산학연계/data/1_18/forgram/data/1_18"
+filename = "Take 2019-01-18 04.49.18 PM_걷기.csv"
+
+with open(os.path.join(filepath, filename),
+          newline='') as csvfile:
     spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
     for row in spamreader:
         # print(spamreader.line_num)
@@ -170,6 +176,9 @@ for i in range(0, len(y_np) - seq_length):
     dataX.append(_x)  # dataX 리스트에 추가
     dataY.append(_y)  # dataY 리스트에 추가
 print("Hello")
+
+# numpy로 봐야겠다.
+
 # 학습용/테스트용 데이터 생성
 # 전체 70%를 학습용 데이터로 사용
 train_size = int(len(dataY) * 0.7)
