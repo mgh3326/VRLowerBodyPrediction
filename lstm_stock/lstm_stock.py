@@ -142,6 +142,7 @@ def lstm_cell():
     # state_is_tuple: False ==> they are concatenated along the column axis.
     cell = tf.contrib.rnn.BasicLSTMCell(num_units=rnn_cell_hidden_dim,
                                         forget_bias=forget_bias, state_is_tuple=True, activation=tf.nn.softsign)
+                                        
     if keep_prob < 1.0:
         cell = tf.contrib.rnn.DropoutWrapper(cell, output_keep_prob=keep_prob)
     return cell

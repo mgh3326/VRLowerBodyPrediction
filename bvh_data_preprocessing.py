@@ -52,5 +52,5 @@ df_rotations_output.rename(columns=lambda x: str(x) + "_rotations", inplace=True
 print(df_worldpos_input)
 out_df = pandas.concat([df_time, df_worldpos_input, df_rotations_input, df_worldpos_output, df_rotations_output],
                        axis=1)  # column bind
-out_file_name = "preprocesiing_" + filename+"csv"
+out_file_name = "preprocesiing_" + filename+".csv"
 out_df.to_csv(out_file_name, sep=',', encoding='utf-8', index=False)

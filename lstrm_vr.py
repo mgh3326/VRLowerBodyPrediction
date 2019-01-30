@@ -67,8 +67,8 @@ skeleton_list = []  # 스켈레톤 순서를 담기 위함
 oh_list = ["Rotation", "Position"]
 oh2_list = ["X", "Y", "Z", "W", "X", "Y", "Z"]
 my_list = []
-filepath = "C:/Users/mgh33/OneDrive/4학년1학기/산학연계/data/1_18/forgram/data/1_18"
-filename = "Take 2019-01-18 04.49.18 PM_걷기.csv"
+filepath = "./data/1_3"
+filename = "small_Take 2019-01-03 03.48.29 PM.csv"
 
 with open(os.path.join(filepath, filename),
           newline='') as csvfile:
@@ -216,6 +216,7 @@ def lstm_cell():
     # state_is_tuple: False ==> they are concatenated along the column axis.
     cell = tf.contrib.rnn.BasicLSTMCell(num_units=rnn_cell_hidden_dim,
                                         forget_bias=forget_bias, state_is_tuple=True, activation=tf.nn.softsign)
+    
     if keep_prob < 1.0:
         cell = tf.contrib.rnn.DropoutWrapper(cell, output_keep_prob=keep_prob)
     return cell
