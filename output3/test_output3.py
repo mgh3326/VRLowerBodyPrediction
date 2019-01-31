@@ -110,14 +110,10 @@ print("hypothesis: ", hypothesis)
 # 과거 여러 거래일의 주가를 이용해서 다음날의 주가 1개를 예측하기때문에 MANY-TO-ONE형태이다
 hypothesis = tf.contrib.layers.fully_connected(hypothesis[:, -1], output_data_column_cnt, activation_fn=tf.identity)
 
-sess = tf.Session()
-sess.run(tf.global_variables_initializer())
-
-save_file = './train_model.ckpt'
+save_file = './model/train_model.ckpt'
 saver = tf.train.Saver()
 # Save the model
-saver.save(sess, save_file)
-print('Trained Model Saved.')
+
 
 # with tf.Session() as sess:
 sess = tf.Session()
