@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 # tf.set_random_seed(777)
 
 # 하이퍼파라미터
-input_data_column_cnt = 1 * 3  # 입력데이터의 컬럼 개수(Variable 개수)
+input_data_column_cnt = 1 * 6  # 입력데이터의 컬럼 개수(Variable 개수)
 output_data_column_cnt = 1  # 결과데이터의 컬럼 개수
 
 seq_length = 120  # 1개 시퀀스의 길이(시계열데이터 입력 개수)
@@ -19,7 +19,7 @@ forget_bias = 1.0  # 망각편향(기본값 1.0)
 num_stacked_layers = 1  # stacked LSTM layers 개수
 keep_prob = 1.0  # dropout할 때 keep할 비율
 
-epoch_num = 100  # 에폭 횟수(학습용전체데이터를 몇 회 반복해서 학습할 것인가 입력)
+epoch_num = 1000  # 에폭 횟수(학습용전체데이터를 몇 회 반복해서 학습할 것인가 입력)
 learning_rate = 0.01  # 학습률
 
 my_dict = {"제자리": 0, "움직임": 1}
@@ -41,19 +41,12 @@ def dataFilePreproccessing(data_folder_name):
             for line in lines:  # 마지막에 \n 이걸 없애주네
                 L.append(line.split('\n')[0])
             total_list = []
-            temp_index = 0
             for line in L:
-                temp_index += 1
-
-                if temp_index % 2 == 0:
-                    continue
-
                 my_list = line.split("//")
-
                 data_list = []
 
                 for i in range(len(my_list)):
-                    if i > 0:
+                    if i > 1:
                         break
 
                     my_list[i] = my_list[i].strip()
@@ -75,13 +68,13 @@ def dataFilePreproccessing(data_folder_name):
                 dataY.append([my_dict[folder_index]])
 
 
-folder_path = "./data/vr/"
+folder_path = "./data/vr_0319/"
 
 dataX = []  # 입력으로 사용될 Sequence Data
 dataY = []  # 출력(타켓)으로 사용
 
 dataFilePreproccessing(folder_path)
-print("hello")
+print("start")
 
 # numpy로 봐야겠다.
 

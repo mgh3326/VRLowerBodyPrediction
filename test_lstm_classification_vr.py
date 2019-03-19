@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 tf.set_random_seed(777)
 
 # 하이퍼파라미터
-input_data_column_cnt = 3 * 6  # 입력데이터의 컬럼 개수(Variable 개수)
+input_data_column_cnt = 1 * 6  # 입력데이터의 컬럼 개수(Variable 개수)
 output_data_column_cnt = 1  # 결과데이터의 컬럼 개수
 
 seq_length = 120  # 1개 시퀀스의 길이(시계열데이터 입력 개수)
@@ -52,6 +52,8 @@ def dataFilePreproccessing(file_path):
         data_list = []
 
         for i in range(len(my_list)):
+            if i > 1:
+                break
 
             my_list[i] = my_list[i].strip()
             temp_list = my_list[i].split(" ")
@@ -72,7 +74,7 @@ def dataFilePreproccessing(file_path):
 
 
 dataX = []  # 입력으로 사용될 Sequence Data
-file_path = "./data/test/테스트 섞임.txt"
+file_path = "./data/vr_0319/움직임/FowardWalk.txt"
 dataFilePreproccessing(file_path)
 
 
@@ -123,7 +125,7 @@ test_error_summary = []  # 테스트용 데이터의 오류를 중간 중간 기
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
-save_file = './model_0311/train_model.ckpt'
+save_file = './model/train_model.ckpt'
 saver = tf.train.Saver()
 # Save the model
 saver.save(sess, save_file)
@@ -143,7 +145,7 @@ for data in dataX:
     # print("recent_data:", data, end=" : ")
     # 내일 종가를 예측해본다
     test_predict = sess.run(hypothesis, feed_dict={X: dataX[index:index + 1]})
-    outputx_list.append(index + 119)
+    outputx_list.append(index + seq_length - 1)
     # print(test_predict[0][0], end=", ")
     outputy_list.append(test_predict[0][0])
 
