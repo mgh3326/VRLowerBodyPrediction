@@ -14,7 +14,7 @@ tf.set_random_seed(777)
 input_data_column_cnt = 1 * 6  # 입력데이터의 컬럼 개수(Variable 개수)
 output_data_column_cnt = 1  # 결과데이터의 컬럼 개수
 
-seq_length = 120  # 1개 시퀀스의 길이(시계열데이터 입력 개수)
+seq_length = 960  # 1개 시퀀스의 길이(시계열데이터 입력 개수)
 rnn_cell_hidden_dim = 20  # 각 셀의 (hidden)출력 크기
 forget_bias = 1.0  # 망각편향(기본값 1.0)
 num_stacked_layers = 1  # stacked LSTM layers 개수
@@ -48,21 +48,17 @@ def dataFilePreproccessing(file_path):
         L.append(line.split('\n')[0])
     total_list = []
     for line in L:
-        my_list = line.split("//")
+
+        my_list = line
         data_list = []
 
-        for i in range(len(my_list)):
-            if i > 1:
-                break
-
-            my_list[i] = my_list[i].strip()
-            temp_list = my_list[i].split(" ")
-            for temp in temp_list:
-                data_list.append(temp.split("=")[1])
+        my_list[i] = my_list[i].strip()
+        temp_list = my_list[i].split(" ")
+        for temp in temp_list:
+            data_list.append(temp.split("=")[1])
         total_list.append(data_list)
         print("")
     x_np = np.zeros(0).reshape(0, input_data_column_cnt)
-    y_np = np.zeros(0).reshape(0, 1)
     x_np = np.append(x_np, np.asarray(total_list), axis=0)
     for i in range(0, len(x_np) - seq_length):
         _x = x_np[i: i + seq_length]
@@ -74,7 +70,7 @@ def dataFilePreproccessing(file_path):
 
 
 dataX = []  # 입력으로 사용될 Sequence Data
-file_path = "./data/vr_0319/움직임/FowardWalk.txt"
+file_path = "./data/test/test.txt"
 dataFilePreproccessing(file_path)
 
 
@@ -125,7 +121,7 @@ test_error_summary = []  # 테스트용 데이터의 오류를 중간 중간 기
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
-save_file = './model/train_model.ckpt'
+save_file = './model0417/train_model.ckpt'
 saver = tf.train.Saver()
 # Save the model
 saver.save(sess, save_file)
@@ -139,32 +135,50 @@ saver.restore(sess, save_file)
 index = 0
 outputx_list = []
 outputy_list = []
-for data in dataX:
-    # print(index + 119, end=", ")
 
-    # print("recent_data:", data, end=" : ")
-    # 내일 종가를 예측해본다
-    test_predict = sess.run(hypothesis, feed_dict={X: dataX[index:index + 1]})
-    outputx_list.append(index + seq_length - 1)
-    # print(test_predict[0][0], end=", ")
-    outputy_list.append(test_predict[0][0])
+# print(index + 119, end=", ")
 
-    # if (test_predict > 0.8):
-    #     print("moving")
-    # else:
-    #     print("stand")
-    index = index + 1
+# print("recent_data:", data, end=" : ")
+# 내일 종가를 예측해본다
+oh = dataX[0]
+test_predict = sess.run(hypothesis, feed_dict={X: [dataX[0]]})
+
+# print(test_predict[0][0], end=", ")
+print(test_predict[0][0])
+b = np.zeros((240, 6))
+# if (test_predict > 0.8):
+#     print("moving")
+# else:
+#     print("stand")
 # test_predict = reverse_min_max_scaling(price, test_predict)  # 금액데이터 역정규화한다
 # print("Tomorrow's stock price", test_predict[0])  # 예측한 주가를 출력한다
-
-# Make a line plot: year on the x-axis, pop on the y-axis
-plt.plot(outputx_list, outputy_list)
-plt.show()
-# ~929 stand
-# ~2233 : moving
-# 3600 : stand
-# 4468 moving
-# 5248 stand
-# 6106 moving
-# 7138 stand
-# ~ end moving
+# for data in dataX:
+#     # print(index + 119, end=", ")
+#
+#     # print("recent_data:", data, end=" : ")
+#     # 내일 종가를 예측해본다
+#     test_predict = sess.run(hypothesis, feed_dict={X: dataX[index:index + 1]})
+#
+#     outputx_list.append(index + seq_length - 1)
+#     # print(test_predict[0][0], end=", ")
+#     outputy_list.append(test_predict[0][0])
+#
+#     # if (test_predict > 0.8):
+#     #     print("moving")
+#     # else:
+#     #     print("stand")
+#     index = index + 1
+# # test_predict = reverse_min_max_scaling(price, test_predict)  # 금액데이터 역정규화한다
+# # print("Tomorrow's stock price", test_predict[0])  # 예측한 주가를 출력한다
+# print(outputy_list)
+# # Make a line plot: year on the x-axis, pop on the y-axis
+# # plt.plot(outputx_list, outputy_list)
+# # plt.show()
+# # ~929 stand
+# # ~2233 : moving
+# # 3600 : stand
+# # 4468 moving
+# # 5248 stand
+# # 6106 moving
+# # 7138 stand
+# # ~ end moving

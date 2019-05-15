@@ -10,16 +10,17 @@ import matplotlib.pyplot as plt
 # tf.set_random_seed(777)
 
 # 하이퍼파라미터
-input_data_column_cnt = 1 * 6  # 입력데이터의 컬럼 개수(Variable 개수)
+input_data_column_cnt = 1 * 3  # 입력데이터의 컬럼 개수(Variable 개수)
 output_data_column_cnt = 1  # 결과데이터의 컬럼 개수
 
-seq_length = 120  # 1개 시퀀스의 길이(시계열데이터 입력 개수)
+seq_length = 960
+# 1개 시퀀스의 길이(시계열데이터 입력 개수)
 rnn_cell_hidden_dim = 20  # 각 셀의 (hidden)출력 크기
 forget_bias = 1.0  # 망각편향(기본값 1.0)
 num_stacked_layers = 1  # stacked LSTM layers 개수
 keep_prob = 1.0  # dropout할 때 keep할 비율
 
-epoch_num = 1000  # 에폭 횟수(학습용전체데이터를 몇 회 반복해서 학습할 것인가 입력)
+epoch_num = 100  # 에폭 횟수(학습용전체데이터를 몇 회 반복해서 학습할 것인가 입력)
 learning_rate = 0.01  # 학습률
 
 my_dict = {"제자리": 0, "움직임": 1}
@@ -42,24 +43,24 @@ def dataFilePreproccessing(data_folder_name):
                 L.append(line.split('\n')[0])
             total_list = []
             for line in L:
-                my_list = line.split("//")
+
+                my_list = line
                 data_list = []
 
-                for i in range(len(my_list)):
-                    if i > 1:
-                        break
+                # for i in range(len(my_list)):
+                # if i > 1:
+                #     break
 
-                    my_list[i] = my_list[i].strip()
-                    temp_list = my_list[i].split(" ")
-                    for temp in temp_list:
-                        data_list.append(temp.split("=")[1])
+                my_list = my_list.strip()
+                temp_list = my_list.split(" ")
+                for temp in temp_list:
+                    data_list.append(temp.split("=")[1])
                 total_list.append(data_list)
-                print("")
+                # print("")
             x_np = np.zeros(0).reshape(0, input_data_column_cnt)
-            y_np = np.zeros(0).reshape(0, 1)
             x_np = np.append(x_np, np.asarray(total_list), axis=0)
-            for i in range(0, len(x_np) - seq_length):
-                _x = x_np[i: i + seq_length]
+            for _i in range(0, len(x_np) - seq_length):
+                _x = x_np[_i: _i + seq_length]
                 # _y = y_np[i + seq_length]  # 다음 나타날 주가(정답)
                 # if i is 0:
                 #     print(_x, "->", _y)  # 첫번째 행만 출력해 봄
@@ -68,7 +69,7 @@ def dataFilePreproccessing(data_folder_name):
                 dataY.append([my_dict[folder_index]])
 
 
-folder_path = "./data/vr_0319/"
+folder_path = "./data/vr_0410"
 
 dataX = []  # 입력으로 사용될 Sequence Data
 dataY = []  # 출력(타켓)으로 사용
@@ -167,8 +168,51 @@ sess.run(tf.global_variables_initializer())
 # 학습한다
 start_time = datetime.datetime.now()  # 시작시간을 기록한다
 print('학습을 시작합니다...')
+batch_size = int((trainX.shape[0] / 25))
+
+batch_count = int(trainX.shape[0] / batch_size)  # 배치의 갯수
+print(batch_count)
+
+# for epoch in range(epoch_num):
+
+    # for i in range(batch_count):  # 배치를 순차적으로 읽는 루프
+    #     print(i, batch_count, i / (batch_count) * 100)
+    #     # 배치사이즈 만큼 데이터를 읽어옴
+    #     batch_xs, batch_ys = trainX[i * batch_size:i * batch_size + batch_size], trainY[
+    #                                                                              i * batch_size:i * batch_size + batch_size]
+    #
+    #     # training, 이를 통해 W, b Variable 값을 조정함
+    #     _, _loss = sess.run([train, loss], feed_dict={X: batch_xs, Y: batch_ys})
+    #
+    #     # 5번 배치를 읽고 이를 트레이닝한 후 정확도 출력
+    #     if (((epoch + 1) % 10 == 0) or (epoch == epoch_num - 1)) and i == 0:  # 10번째마다 또는 마지막 epoch인 경우
+    #         # 학습용데이터로 rmse오차를 구한다
+    #         train_predict = sess.run(hypothesis, feed_dict={X: trainX})
+    #
+    #         train_error = sess.run(rmse, feed_dict={targets: trainY, predictions: train_predict})
+    #         train_error_summary.append(train_error)
+    #
+    #         # 테스트용데이터로 rmse오차를 구한다
+    #         test_predict = sess.run(hypothesis, feed_dict={X: testX})
+    #
+    #         test_error = sess.run(rmse, feed_dict={targets: testY, predictions: test_predict})
+    #         test_error_summary.append(test_error)
+    #
+    #         # 현재 오류를 출력한다
+    #         print("epoch: {}, train_error(A): {}, test_error(B): {}, B-A: {}".format(epoch + 1, train_error, test_error,
+    #                                                                                  test_error - train_error))
 for epoch in range(epoch_num):
+    print(epoch)
+    # for i in range(batch_count):  # 배치를 순차적으로 읽는 루프
+    #     print(i, batch_count, i / (batch_count) * 100)
+    #     # 배치사이즈 만큼 데이터를 읽어옴
+    #     batch_xs, batch_ys = trainX[i * batch_size:i * batch_size + batch_size], trainY[
+    #                                                                              i * batch_size:i * batch_size + batch_size]
+    #
+    #     # training, 이를 통해 W, b Variable 값을 조정함
     _, _loss = sess.run([train, loss], feed_dict={X: trainX, Y: trainY})
+
+    # 5번 배치를 읽고 이를 트레이닝한 후 정확도 출력
     if ((epoch + 1) % 10 == 0) or (epoch == epoch_num - 1):  # 10번째마다 또는 마지막 epoch인 경우
         # 학습용데이터로 rmse오차를 구한다
         train_predict = sess.run(hypothesis, feed_dict={X: trainX})
@@ -185,7 +229,8 @@ for epoch in range(epoch_num):
         # 현재 오류를 출력한다
         print("epoch: {}, train_error(A): {}, test_error(B): {}, B-A: {}".format(epoch + 1, train_error, test_error,
                                                                                  test_error - train_error))
-model_folder = "./model"
+
+model_folder = "./model_0410"
 if not os.path.exists(model_folder):
     os.makedirs(model_folder)
 save_file = os.path.join(model_folder, "train_model.ckpt")
