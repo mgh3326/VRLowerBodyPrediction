@@ -1,3 +1,4 @@
+import json
 import os
 
 import tensorflow as tf
@@ -34,46 +35,25 @@ print("targets: ", targets)
 
 predictions = tf.placeholder(tf.float32, [None, output_data_column_cnt])
 print("predictions: ", predictions)
-
-
-def dataFilePreproccessing(file_path):
-    L = []
-    file = open(file_path, 'r')
-
-    lines = file.readlines()
-
-    file.close()
-
-    for line in lines:  # 마지막에 \n 이걸 없애주네
-        L.append(line.split('\n')[0])
-    total_list = []
-    for line in L:
-
-        my_list = line
-        data_list = []
-
-        for _my_list in my_list.strip().split("//"):
-
-            _my_list = _my_list.strip()
-            temp_list = _my_list.split(" ")
-            for temp in temp_list:
-                data_list.append(temp.split("=")[1])
-        total_list.append(data_list)
-        print("")
-    x_np = np.zeros(0).reshape(0, input_data_column_cnt)
-    x_np = np.append(x_np, np.asarray(total_list), axis=0)
-    for i in range(0, len(x_np) - seq_length):
-        _x = x_np[i: i + seq_length]
-        # _y = y_np[i + seq_length]  # 다음 나타날 주가(정답)
-        # if i is 0:
-        #     print(_x, "->", _y)  # 첫번째 행만 출력해 봄
-        dataX.append(_x)  # dataX 리스트에 추가
-        # dataY.append(_y)  # dataY 리스트에 추가
-
-
-dataX = []  # 입력으로 사용될 Sequence Data
-file_path = "./data/vr_0508/test.txt"
-dataFilePreproccessing(file_path)
+status_list = ["stand", "walk"]
+my_list = []
+with open('./data/test_0515/test.txt', 'r') as f:
+    for line in f.readlines():
+        jsonInput = json.loads(line)
+        temp_list = [jsonInput["head"]["pitch"], jsonInput["head"]["yaw"], jsonInput["head"]["roll"],
+                     jsonInput["lHand"]["pitch"], jsonInput["lHand"]["yaw"], jsonInput["lHand"]["roll"],
+                     jsonInput["rHand"]["pitch"], jsonInput["rHand"]["yaw"], jsonInput["rHand"]["roll"]]
+        my_list.append(temp_list)
+        # print(line)
+x_np = np.zeros(0).reshape(0, input_data_column_cnt)
+x_np = np.append(x_np, np.asarray(my_list), axis=0)
+dataX = []
+for i in range(0, len(x_np) - seq_length):
+    _x = x_np[i: i + seq_length]
+    # _y = y_np[i + seq_length]  # 다음 나타날 주가(정답)
+    # if i is 0:
+    #     print(_x, "->", _y)  # 첫번째 행만 출력해 봄
+    dataX.append(_x)  # dataX 리스트에 추가
 
 
 # 모델(LSTM 네트워크) 생성
@@ -161,10 +141,10 @@ for data in dataX:
     outputx_list.append(index + seq_length - 1)
     # print(test_predict[0][0], end=", ")
     result = test_predict[0][0]
-    if result > 0.3:
-        result = 1
-    else:
-        result = 0
+    # if result > 0.5:
+    #     result = 1
+    # else:
+    #     result = 0
     outputy_list.append(result)
     # if result > 0.5:
     #     outputy_list.append(1)
@@ -180,7 +160,14 @@ for data in dataX:
 # test_predict = reverse_min_max_scaling(price, test_predict)  # 금액데이터 역정규화한다
 # print("Tomorrow's stock price", test_predict[0])  # 예측한 주가를 출력한다
 print(outputy_list)
-temp_list = [175+46, 252+46]
+# ~ 209 : s
+# ~ 328 : w
+# ~ 507 : s
+# ~ 612 : w
+# ~ 690 : s
+jump_num = 46
+# temp_list = [209, 328, 507, 612, 690]
+temp_list = [209+jump_num , 328+jump_num , 507+jump_num , 612+jump_num , 690+jump_num ]
 eval_list = []
 status = 0
 
@@ -188,17 +175,36 @@ for i in range(temp_list[0] - (seq_length - 1)):
     eval_list.append(0)
 for i in range(temp_list[1] - temp_list[0]):
     eval_list.append(1)
+for i in range(temp_list[2] - temp_list[1]):
+    eval_list.append(0)
+for i in range(temp_list[3] - temp_list[2]):
+    eval_list.append(1)
+# for i in range(temp_list[4] - temp_list[3]):
+#     eval_list.append(0)
 for i in range(len(outputy_list) - len(eval_list)):
     eval_list.append(0)
 count = 0
 for i in range(len(eval_list)):
     if eval_list[i] != outputy_list[i]:
         count += 1
-print(len(eval_list), count,(len(eval_list)-count)/len(eval_list))
+print(len(eval_list), count, (len(eval_list) - count) / len(eval_list))
 # Make a line plot: year on the x-axis, pop on the y-axis
 plt.plot(outputx_list, outputy_list)
-plt.plot(outputx_list, eval_list)
+# plt.plot(outputx_list, eval_list)
 plt.show()
 # # ~175 stand
 # # ~252 : moving
 # #  : stand
+
+
+# switch_index_list = [100, 200, 300]
+# current_status = 0
+# temp_status_list = [0]
+#
+# for switch_index in switch_index_list:
+#     for i in range(switch_index):
+#         temp_status_list.append(current_status)
+#     if current_status == 0:
+#         current_status = 1
+#     else:
+#         current_status = 0
